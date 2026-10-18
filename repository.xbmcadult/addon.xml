@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="repository.xbmcadult" name="XBMC-Adult Addons" version="1.0.9" provider-name="xbmc-adult">
+	<extension point="xbmc.addon.repository" name="XBMC Adult Addons">
+		<dir>
+			<info compressed="false">https://raw.githubusercontent.com/Nikkoshoptr/misc-pack/main/addons.xml</info>
+			<checksum>https://raw.githubusercontent.com/Nikkoshoptr/misc-pack/main/addons.xml.md5</checksum>
+			<datadir zip="true">https://raw.githubusercontent.com/Nikkoshoptr/misc-pack/main</datadir>
+		</dir>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<summary>Misc addons pack</summary>
+		<description>Misc pack.</description>
+		<platform>all</platform>
+	</extension>
+</addon>
