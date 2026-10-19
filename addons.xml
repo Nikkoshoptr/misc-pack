@@ -2,14 +2,12 @@
 <addons>
 <addon
   id="plugin.video.videodevil"
-  version="1.8.28"
+  version="1.9.2"
   name="VideoDevil"
   provider-name="xbmc-adult">
   <requires>
     <!-- Commenting xbmc.python allows install on all versions of Kodi -->
     <!-- <import addon="xbmc.python" version="2.14.0"/> -->
-    <import addon="script.module.six"/>
-    <import addon="script.module.kodi-six"/>
   </requires>
   <extension 
     point="xbmc.python.pluginsource"
