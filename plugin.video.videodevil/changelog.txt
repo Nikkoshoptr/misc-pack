@@ -1,3 +1,10 @@
+[B]Version 1.9.5[/B]
+
+- Added: KVS (kt_player) video token decoder — videodevil.py (kvs_decode)
+- Fixed: ah-me video oynatma ('function/0/...' tokenlari artik dogru B-token'a decode ediliyor; 2 gercek video ile sunucu-side dogrulandi)
+- Updated: catcher KVS ailesi (ahme, analdin, ashemaletube, amateur8, fapnado, keekass, anyshemale, anysex, transdoe, transtube) action=kvs kurallari
+- Not: decode lisansi sayfadan otomatik bulunur (16-char 'code' anahtari); direct/plain URL'ler degismeden gecer
+
 [B]Version 1.9.4[/B]
 
 - Added: amateur8, anysex, anyshemale, fapnado, keekass, shemaletubevideos, transdoe, transtube
