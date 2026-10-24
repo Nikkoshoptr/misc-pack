@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addon
+  id="plugin.video.miscpack"
+  version="1.0.0"
+  name="Misc Pack"
+  provider-name="misc">
+  <requires>
+    <!-- Commenting xbmc.python allows install on all versions of Kodi -->
+    <!-- <import addon="xbmc.python" version="2.14.0"/> -->
+  </requires>
+  <extension 
+    point="xbmc.python.pluginsource"
+    library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="de_DE">Wiedergabe von Videos aus selbst gewählten Online-Quellen</summary>
+    <summary lang="en_GB">Play videos from user-selected online sources</summary>
+    <summary lang="fi_FI">Toista videoita itse valituista online-lähteistä</summary>
+    <summary lang="fr_FR">Lire des vidéos depuis des sources en ligne librement choisies</summary>
+    <summary lang="pt_PT">Reproduza vídeos de fontes online selecionadas pelo utilizador</summary>
+    <summary lang="sv_SE">Spela videor från självvalda onlinekällor</summary>
+    <description lang="de_DE">Dieses Addon spielt Videos von vom Benutzer frei festgelegten Online-Quellen ab. Es hostet oder verbreitet keine Inhalte; sämtliches Material wird direkt von den jeweiligen Anbietern abgerufen. Nur für Erwachsene (18+).</description>
+    <description lang="en_GB">This addon plays videos from user-selected online sources. It does not host or distribute any content; all material is accessed directly from the original providers. Adults only (18+).</description>
+    <description lang="fi_FI">Tämä lisäosa toistaa videoita käyttäjän valitsemista online-lähteistä. Se ei isännöi eikä jatele sisältöä; kaikki aineisto noudetaan suoraan alkuperäisistä palveluista. Vain aikuisille (18+).</description>
+    <description lang="fr_FR">Cet addon lit des vidéos provenant de sources en ligne choisies par l'utilisateur. Il n'héberge ni ne distribue aucun contenu ; tout le matériel est consulté directement auprès des fournisseurs d'origine. Réservé aux adultes (18+).</description>
+    <description lang="pt_PT">Este complemento reproduz vídeos de fontes online escolhidas pelo utilizador. Não aloja nem distribui conteúdo; todo o material é obtido directamente dos fornecedores originais. Apenas para adultos (18+).</description>
+    <description lang="sv_SE">Detta tillägg spelar upp videor från användarvalda onlinekällor. Det värdar eller distribuerar inget innehåll; allt material hämtas direkt från de ursprungliga leverantörerna. Endast för vuxna (18+).</description>
+
+    <disclaimer lang="de_DE">Der Autor hostet oder verbreitet keinen der von diesem Addon angezeigten Inhalte. Der Autor hat keine Verbindung zum Inhalteanbieter.</disclaimer>
+    <disclaimer lang="en_GB">The author does not host or distribute any of the content displayed by this addon. The author does not have any affiliation with the content provider.</disclaimer>
+    <disclaimer lang="fi_FI">Kirjoittaja ei isännöi tai jaa mitään tämän lisäosan näytettyä sisältöä. Kirjoittajalla ei ole mitään siteitä sisällöntuottajaan.</disclaimer>
+    <disclaimer lang="fr_FR">L'auteur n'héberge ni ne distribue aucun des contenus affichés par cet addon. L'auteur n'a aucune affiliation avec le fournisseur de contenu.</disclaimer>
+    <disclaimer lang="pt_PT">O autor não hospeda nem distribui nenhum conteúdo exibido por este complemento. O autor não tem nenhuma afiliação com o provedor de conteúdo.</disclaimer>
+    <disclaimer lang="sv_SE">Författaren är inte värd eller distribuerar något av innehållet som visas av detta tillägg. Författaren har ingen anknytning till innehållsleverantören.</disclaimer>
+    <platform>all</platform>
+    <assets>
+      <icon>icon.png</icon>
+    </assets>
+  </extension>
+</addon>

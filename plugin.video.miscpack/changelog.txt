@@ -1,0 +1,10 @@
+[B]Version 1.0.0[/B]
+
+- Initial rebranded release of the working 1.9.5 code base
+- Added: KVS (kt_player) video token decoder — videolinks.py (kvs_decode)
+- Fixed: ah-me video playback ('function/0/...' tokens are now decoded to the
+  valid B-token; verified server-side against 2 real videos)
+- Updated: catcher KVS family (ahme, analdin, ashemaletube, amateur8, fapnado,
+  keekass, anyshemale, anysex, transdoe, transtube) action=kvs rules
+- Note: the decode license is found automatically on the page (16-char 'code'
+  key); direct/plain URLs pass through unchanged
