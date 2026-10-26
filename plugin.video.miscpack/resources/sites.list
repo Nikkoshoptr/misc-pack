@@ -43,13 +43,6 @@ director=Misc Pack
 icon=video.devil.image|anyshemale.png
 url=anyshemale.com.cfg
 ########################################################
-title=BitPorno
-type=rss
-genre=BitPorno
-director=Misc Pack
-icon=video.devil.image|bitporno.png
-url=bitporno.com.cfg
-########################################################
 title=CelebsNude
 type=rss
 genre=CelebsNude
@@ -119,6 +112,13 @@ genre=KeekAss
 director=Misc Pack
 icon=video.devil.image|keekass.png
 url=keekass.com.cfg
+########################################################
+title=HCLips
+type=rss
+genre=HCLips
+director=Misc Pack
+icon=video.devil.image|hclips.png
+url=hclips.com.cfg
 ########################################################
 title=HQporner
 type=rss
@@ -220,10 +220,17 @@ url=redtube.com.cfg
 ########################################################
 title=Sexu
 type=rss
-genre=sexu.com
+genre=Sexu
 director=Misc Pack
-icon=https://sexu.com/images/logo.png
-url=sexu.com.cfg
+icon=video.devil.image|sexu.png
+url=sexu.name.cfg
+########################################################
+title=Txxx
+type=rss
+genre=Txxx
+director=Misc Pack
+icon=video.devil.image|txxx.png
+url=txxx.me.cfg
 ########################################################
 title=SmutIndia
 type=rss
@@ -287,6 +294,13 @@ genre=Tukif
 director=Misc Pack
 icon=video.devil.image|tukif.png
 url=tukif.com.cfg
+########################################################
+title=Upornia
+type=rss
+genre=Upornia
+director=Misc Pack
+icon=video.devil.image|upornia.png
+url=upornia.tube.cfg
 ########################################################
 title=xHamster
 type=rss

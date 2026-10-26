@@ -1,3 +1,15 @@
+[B]Version 1.0.1[/B]
+
+- Removed: BitPorno (block entry, cfg, catcher, settings toggle, icon)
+- Fixed: amateur8 / anyshemale playback (catcher v-acctoken catch-all +
+  get_file target broadening for query-string tokens), anysex thumbnails,
+  sexu icons
+- Added: txxx.me, upornia.tube, hclips.com (TubeCorp JSON API listings)
+  and sexu.name (replaces sexu.com): listing + search + tc playback
+- Added: tc token decoder in core.py (base64 + homoglyph noise cleanup),
+  catcher action=tc rules, JSON "/" unescape in clean2
+- Changed: provider-name now "Misc Pack" (Kodi Author field)
+
 [B]Version 1.0.0[/B]
 
 - Initial rebranded release of the working 1.9.5 code base

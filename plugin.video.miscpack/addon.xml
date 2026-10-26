@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon
   id="plugin.video.miscpack"
-  version="1.0.0"
+  version="1.0.1"
   name="Misc Pack"
-  provider-name="misc">
+  provider-name="Misc Pack">
   <requires>
     <!-- Commenting xbmc.python allows install on all versions of Kodi -->
     <!-- <import addon="xbmc.python" version="2.14.0"/> -->
