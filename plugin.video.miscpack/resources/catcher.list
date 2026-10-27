@@ -236,18 +236,14 @@ extension=mp4
 quality=high
 ########################################################
 title=xhamster.com
-target="mp4":{.*?"240p":"([^"]+)
-url=%s
-extension=mp4
-quality=low
-target="mp4":{.*?"480p":"([^"]+)
-url=%s
-extension=mp4
-quality=standard
-target="mp4":{.*?"720p":"([^"]+)
+target=player-container__no-script-video"[^>]*src="([^"]+)
 url=%s
 extension=mp4
 quality=high
+target=<a href="(https://video[0-9]+\.xhcdn\.com/[^"]+\.mp4[^"]*)"[^>]*class="player-container__no-player
+url=%s
+extension=mp4
+quality=standard
 ########################################################
 title=hotgoo.com
 target=so.addVariable\('file','(.+?)'

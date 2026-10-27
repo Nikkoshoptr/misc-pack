@@ -1,3 +1,13 @@
+[B]Version 1.0.2[/B]
+
+- Fixed: xHamster (2026 redesign) - listings, thumbnails, categories and
+  pagination now parsed from the embedded window.initials JSON (title /
+  pageURL / thumbURL); mega-menu categories via data-role=category-menu-link;
+  Best Videos + Newest shortcuts; next page via rel=next / data-page=next
+- Fixed: xHamster playback - catcher now uses the no-script <video> mp4
+  source (720p) with the no-player fallback link
+- Added: JSON "\/" unescape applied to all parsed item values (clean2)
+
 [B]Version 1.0.1[/B]
 
 - Removed: BitPorno (block entry, cfg, catcher, settings toggle, icon)
