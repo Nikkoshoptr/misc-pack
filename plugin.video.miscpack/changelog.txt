@@ -1,3 +1,10 @@
+[B]Version 1.0.3[/B]
+
+- Fixed: "Save" (download) crashed on Python 2 with
+  "'module' object has no attribute 'urlretrieve'" - urlretrieve is now
+  imported in a Python 2/3 compatible way (urllib on Py2, urllib.request on Py3)
+- Changed: plugin icon is now the Misc Pack (misc-pack) logo
+
 [B]Version 1.0.2[/B]
 
 - Fixed: xHamster (2026 redesign) - listings, thumbnails, categories and

@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="repository.xbmcadult" name="Misc Pack" version="1.0.10" provider-name="misc">
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="repository.xbmcadult" name="Misc Pack" version="1.0.11" provider-name="misc">
 	<extension point="xbmc.addon.repository" name="Misc Pack">
 		<dir>
 			<info compressed="false">https://raw.githubusercontent.com/Nikkoshoptr/misc-pack/main/addons.xml</info>
@@ -12,7 +12,7 @@
 		<description>Mainz misc files.</description>
 		<platform>all</platform>
 		<assets>
-			<icon>logo.png</icon>
+			<icon>icon.png</icon>
 		</assets>
 	</extension>
 </addon>
