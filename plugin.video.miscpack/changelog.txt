@@ -1,3 +1,13 @@
+[B]Version 1.0.4[/B]
+
+- Added: 8 new sites - Kalite18, Maheir, HdAbla, PornoAnne, Doeda, Evooli,
+  RoxPorno and 7Dak (listings, categories, search and pagination)
+- Added: new generic "smart" player resolver (catcher action=smart). It reads
+  the video/player page, follows iframe/embedded players, calls ajax player
+  APIs (ajax_sources.php, hash/vid), parses jwplayer file: sources, JSON-LD
+  contentUrl and <video>/<source> tags, and resolves relative HLS playlists.
+  Covers vidvod, canlitvnews, videojs, fakitonye, cdnfast and similar players.
+
 [B]Version 1.0.3[/B]
 
 - Fixed: "Save" (download) crashed on Python 2 with
