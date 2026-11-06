@@ -1,3 +1,11 @@
+[B]Version 1.0.5[/B]
+
+- Changed: the 8 Turkish-content sites are now prefixed with "Tr-" and moved
+  to the top of the site list so they appear together:
+  Tr-Kalite18, Tr-Maheir, Tr-Hdabla, Tr-Pornoanne, Tr-Doeda, Tr-Evooli,
+  Tr-7Dak and Tr-Roxporno (site visibility toggles in Settings updated to
+  the same IDs/labels).
+
 [B]Version 1.0.4[/B]
 
 - Added: 8 new sites - Kalite18, Maheir, HdAbla, PornoAnne, Doeda, Evooli,

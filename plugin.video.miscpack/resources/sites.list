@@ -1,6 +1,62 @@
 ########################################################
 # Misc Pack Plugin: Adult sites list
 ########################################################
+title=Tr-Kalite18
+type=rss
+genre=Kalite18
+director=Misc Pack
+icon=https://www.kalite18.net/wp-content/uploads/2024/04/favicon.png
+url=kalite18.net.cfg
+########################################################
+title=Tr-Maheir
+type=rss
+genre=Maheir
+director=Misc Pack
+icon=https://maheir.com/wp-content/uploads/2020/09/logo.png
+url=maheir.com.cfg
+########################################################
+title=Tr-Hdabla
+type=rss
+genre=HdAbla
+director=Misc Pack
+icon=https://hdabla.net/wp-content/themes/tak/images/logo.png
+url=hdabla.net.cfg
+########################################################
+title=Tr-Pornoanne
+type=rss
+genre=PornoAnne
+director=Misc Pack
+icon=https://pornoanne.com/wp-content/uploads/2020/03/anne-porno-icon-2.png
+url=pornoanne.com.cfg
+########################################################
+title=Tr-Doeda
+type=rss
+genre=Doeda
+director=Misc Pack
+icon=http://www.doeda.com/wp-content/uploads/2018/02/logoxxx.png
+url=doeda.com.cfg
+########################################################
+title=Tr-Evooli
+type=rss
+genre=Evooli
+director=Misc Pack
+icon=https://www.evooli.com/logo1.png
+url=evooli.com.cfg
+########################################################
+title=Tr-7Dak
+type=rss
+genre=7Dak
+director=Misc Pack
+icon=https://7dak.com/ampstorieslogo.jpg
+url=7dak.com.cfg
+########################################################
+title=Tr-Roxporno
+type=rss
+genre=RoxPorno
+director=Misc Pack
+icon=https://roxporno.com/wp-content/uploads/2019/07/logo.png
+url=roxporno.com.cfg
+########################################################
 title=Ah-Me
 type=rss
 genre=Ah-Me
@@ -336,61 +392,4 @@ genre=YouPorn
 director=Misc Pack
 icon=video.devil.image|youporn.png
 url=youporn.com.cfg
-########################################################
-########################################################
-title=Kalite18
-type=rss
-genre=Kalite18
-director=Misc Pack
-icon=https://www.kalite18.net/wp-content/uploads/2024/04/favicon.png
-url=kalite18.net.cfg
-########################################################
-title=Maheir
-type=rss
-genre=Maheir
-director=Misc Pack
-icon=https://maheir.com/wp-content/uploads/2020/09/logo.png
-url=maheir.com.cfg
-########################################################
-title=HdAbla
-type=rss
-genre=HdAbla
-director=Misc Pack
-icon=https://hdabla.net/wp-content/themes/tak/images/logo.png
-url=hdabla.net.cfg
-########################################################
-title=PornoAnne
-type=rss
-genre=PornoAnne
-director=Misc Pack
-icon=https://pornoanne.com/wp-content/uploads/2020/03/anne-porno-icon-2.png
-url=pornoanne.com.cfg
-########################################################
-title=Doeda
-type=rss
-genre=Doeda
-director=Misc Pack
-icon=http://www.doeda.com/wp-content/uploads/2018/02/logoxxx.png
-url=doeda.com.cfg
-########################################################
-title=Evooli
-type=rss
-genre=Evooli
-director=Misc Pack
-icon=https://www.evooli.com/logo1.png
-url=evooli.com.cfg
-########################################################
-title=RoxPorno
-type=rss
-genre=RoxPorno
-director=Misc Pack
-icon=https://roxporno.com/wp-content/uploads/2019/07/logo.png
-url=roxporno.com.cfg
-########################################################
-title=7Dak
-type=rss
-genre=7Dak
-director=Misc Pack
-icon=https://7dak.com/ampstorieslogo.jpg
-url=7dak.com.cfg
 ########################################################
