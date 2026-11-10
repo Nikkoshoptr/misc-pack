@@ -1,3 +1,11 @@
+[B]Version 1.0.6[/B]
+
+- Fixed: JS cookie gates (e.g. Tr-7Dak's "sto-idd" anti-bot gate) no longer
+  block the listing/resolving: the plugin now emulates the browser behaviour
+  (parse document.cookie from the gate page, inject the cookie and repeat the
+  request, up to 3 tries). Works best with a VPN because the gate accepts a
+  repeat only within one second.
+
 [B]Version 1.0.5[/B]
 
 - Changed: the 8 Turkish-content sites are now prefixed with "Tr-" and moved
