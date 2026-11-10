@@ -464,6 +464,7 @@ class CCatcherItem(object):
 class CCurrentList(object):
     def __init__(self):
         self.start = ''
+        self.start_alts = []
         self.player = ''
         self.sort = 'label'
         self.cfg = ''
@@ -697,6 +698,7 @@ class CCurrentList(object):
                     return -1
 
         self.cfg = filename
+        self.start_alts = []
         if self.getFileExtension(self.cfg) == 'cfg' and lItem is not None:
             lItem.infos_dict['cfg'] = self.cfg
         del self.items[:]
@@ -718,6 +720,10 @@ class CCurrentList(object):
                 value = os.path.join(imgDir, value[index + 1:])
             if key == 'start':
                 self.start = value
+            elif key == 'start_alt':
+                # Alternate start urls: tried when the primary start cant be
+                # fetched or yields no items (apex/www mirror, http/https).
+                self.start_alts.append(value)
             elif key == 'player':
                 self.player = value
             elif key == 'sort':
@@ -808,6 +814,14 @@ class CCurrentList(object):
         if recursive and self.start != '':
             if lItem is None:
                 self.loadRemote(self.start, False)
+                if self.start_alts and len(self.items) == 0:
+                    for alt in self.start_alts:
+                        del self.items[:]
+                        if enable_debug:
+                            xbmc.log('Trying start_alt: ' + str(alt), INFO)
+                        self.loadRemote(alt, False)
+                        if len(self.items) > 0:
+                            break
             else:
                 if self.getFileExtension(lItem.infos_dict['url']) == 'cfg':
                     lItem.infos_dict['url'] = self.start
@@ -1282,6 +1296,7 @@ def smartFetch(url, data=None, referer=''):
 
 class ContentMatcher(object):
     def search(self, rule, contents, url=''):
+        self.media_referer = url
         matches = re.search(rule.target, contents)
         if not matches:
             return ''
@@ -1325,9 +1340,14 @@ class ContentMatcher(object):
             if 'ajax_sources.php' in text:
                 media = self.smartAjax(text, base_url)
                 if media:
+                    # The request headers for the final play must use this
+                    # page (often an iframe player like play.vidvod.xyz) as
+                    # their Referer, not the video page itself.
+                    self.media_referer = base_url
                     return self.smartAbsolute(media, base_url)
             media = self.smartExtractStructured(text)
             if media:
+                self.media_referer = base_url
                 return self.smartAbsolute(media, base_url)
             if depth < 2:
                 for frame in self.smartFrames(text, base_url):
@@ -1338,6 +1358,7 @@ class ContentMatcher(object):
                             return media
             media = self.smartExtractAny(text)
             if media:
+                self.media_referer = base_url
                 return self.smartAbsolute(media, base_url)
             return ''
         except Exception:
@@ -1491,12 +1512,25 @@ class Main(object):
                 return
 
         hdrs = {'User-Agent': USERAGENT,
-                'Referer': original_url}
-        cj.load(TRANSLATEPATH(cookiePath), ignore_discard=True)
-        cookies = {c.name: c.value for c in cj}
-        if cookies:
-            cookies = "; ".join("=".join(pair) for pair in cookies.items())
-            hdrs.update({'Cookie': cookies})
+                'Referer': self.matcher.media_referer or original_url}
+        # only send cookies that belong to the media host (foreign cookies
+        # from other sites can make some CDNs reject the request)
+        try:
+            media_host = urllib_parse.urlparse(
+                match.split('|')[0]).netloc
+            cj.load(TRANSLATEPATH(cookiePath), ignore_discard=True)
+            media_cookies = {}
+            for c in cj:
+                d = (c.domain or '').lstrip('.').lower()
+                if d and (media_host == d or media_host.endswith('.' + d)
+                          or d.endswith(media_host)):
+                    media_cookies[c.name] = c.value
+            if media_cookies:
+                hdrs.update({'Cookie': '; '.join(
+                    '='.join(pair) for pair in media_cookies.items())})
+        except Exception:
+            if enable_debug:
+                traceback.print_exc(file=sys.stdout)
         match += '|{0}'.format('&'.join(['{0}={1}'.format(key, urllib_parse.quote_plus(hdrs[key])) for key in hdrs]))
         source.match = match
         self.urlList.append(source.match)

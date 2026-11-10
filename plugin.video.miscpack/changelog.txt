@@ -1,3 +1,17 @@
+[B]Version 1.0.7[/B]
+
+- Fixed: video playback on several sites (Tr-Doeda, Tr-Kalite18 and players
+  of the same type): many stream CDNs only accept requests whose Referer is
+  the player page that actually provides the stream (e.g. play.vidvod.xyz),
+  not the video page. The plugin now remembers the page where the media url
+  was found during resolving and sends that page as the Referer.
+- Fixed: only cookies belonging to the stream host are sent to the CDN
+  (foreign cookies from other portals could make requests fail).
+- Added: alternate start urls (start_alt). When the primary start page can
+  not be fetched or returns no items, the plugin retries with mirror urls:
+  Tr-PornoAnne (www.pornoanne.com), Tr-HdAbla (www.hdabla.net),
+  Tr-7Dak (https://7dak.com).
+
 [B]Version 1.0.6[/B]
 
 - Fixed: JS cookie gates (e.g. Tr-7Dak's "sto-idd" anti-bot gate) no longer
