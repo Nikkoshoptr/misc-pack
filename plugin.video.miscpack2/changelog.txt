@@ -1,0 +1,160 @@
+[B]Version 1.0.13[/B]
+
+- Changed: the addon is published under a fresh id (plugin.video.miscpack2,
+  visible name "Misc Pack 2"). The old id appears stuck in a broken
+  half-registered state on some devices (Vavoo): every update installs but
+  the addon always opens with an empty site list. A fresh id forces a clean
+  install state - the same trick that already fixed the repository addon
+  in 1.0.12 (repository.miscpack2).
+- Same code as 1.0.12: playback referer fix, start_alt mirrors, modern-UA
+  retry, leading-slash loadLocal fallback, on-screen root diagnosis.
+- Install "Misc Pack 2" INSTEAD of the old Misc Pack; the old one can be
+  uninstalled afterwards.
+
+[B]Version 1.0.12[/B]
+
+- Added: on-screen root diagnosis. If the site list is still empty, a dialog
+  now shows exactly what failed on the device (sites.list readable? how many
+  entries parsed / filtered? Python 2 or 3? which paths were used).
+- Added: loadLocal now strips a leading slash from filenames, in case the
+  fork requests "/sites.list" instead of "sites.list".
+- Repository published ALSO under a fresh id (repository.miscpack2 /
+  "Misc Pack 2") to bypass any broken half-registration of the old id in
+  Vavoo. Same files, same URLs, only the addon id is new.
+
+[B]Version 1.0.11[/B]
+
+- Fixed: empty root menu after a fresh install. The site filter now treats
+  missing/empty setting values as ENABLED (only an explicit "false" hides a
+  site) - some Kodi forks return an empty string for settings that were
+  never stored, which wiped the whole site list.
+- Changed: the adult content warning dialog no longer shows on fresh
+  installs by default (hide_warning default is now on). Accidentally
+  answering "No" on that dialog was another way to end up with an empty
+  list. The warning can be re-enabled in the addon settings.
+- Includes all 1.0.10 fixes (fallback chain wired to real navigation,
+  crash-proof diagnostic, gate refetch limited to small pages).
+
+[B]Version 1.0.10[/B]
+
+- Fixed: the start_alt / modern-User-Agent fallback and the on-screen
+  empty-list diagnostic did NOT run for normal site navigation (they were
+  only wired to an internal load path). Every site menu click now uses the
+  full fallback chain: primary start -> start_alt mirrors -> modern UA
+  retry -> diagnostic dialog.
+- Hardened: the diagnostic dialog is now crash-proof (Python 2 safe message
+  building, every step wrapped); the JS cookie gate refetch only triggers
+  on small pages (< 4 KB) so real pages containing document.cookie lines
+  are never mistaken for a gate.
+- Repository addon.xml unchanged (plain checksum, no verify attribute).
+
+[B]Version 1.0.9[/B]
+
+- Fixed: repository.miscpack-1.0.8.zip could crash Vavoo when installing
+  (the addon.xml checksum "verify" attribute is not accepted by some Vavoo
+  builds). The attribute is removed again; the repository zip installs
+  normally now.
+- No plugin functional changes; version bumped to keep the plugin and the
+  repository addon at the same version number.
+
+[B]Version 1.0.8[/B]
+
+- Fixed: the JS cookie gate emulation (sto-idd etc.) NEVER matched the gate
+  script - the regex required a closing quote right after the cookie value,
+  but the value is followed by "; max-age=..." so the match failed and the
+  gate handling was dead code. The detection regex is fixed (both fetch
+  paths).
+- Fixed: LISTING fetches now handle JS cookie gates too. The 1.0.6 gate
+  emulation only covered player/resolver requests; Tr-7Dak's start page is
+  fetched through a different path that hit the gate unprotected -> empty
+  list. Now the gate is emulated on the list fetch as well (max 3 tries,
+  refetch within the 1 second cookie window).
+- Added: each start url is automatically retried once with a modern
+  User-Agent (Chrome 126) - some portals reject or challenge the ancient
+  default User-Agent from the plugin.
+- Added: when a site list still comes back empty, the plugin now shows a
+  small on-screen diagnostic (per attempt: connection error, page size,
+  Cloudflare / BTK block / JS-gate classification) so problems can be
+  reported and fixed precisely.
+- Repository: addons.xml checksum set to verify="false" so update checks
+  always refetch fresh metadata (stale cached "1.0.6" listings fixed).
+
+[B]Version 1.0.7[/B]
+
+- Fixed: video playback on several sites (Tr-Doeda, Tr-Kalite18 and players
+  of the same type): many stream CDNs only accept requests whose Referer is
+  the player page that actually provides the stream (e.g. play.vidvod.xyz),
+  not the video page. The plugin now remembers the page where the media url
+  was found during resolving and sends that page as the Referer.
+- Fixed: only cookies belonging to the stream host are sent to the CDN
+  (foreign cookies from other portals could make requests fail).
+- Added: alternate start urls (start_alt). When the primary start page can
+  not be fetched or returns no items, the plugin retries with mirror urls:
+  Tr-PornoAnne (www.pornoanne.com), Tr-HdAbla (www.hdabla.net),
+  Tr-7Dak (https://7dak.com).
+
+[B]Version 1.0.6[/B]
+
+- Fixed: JS cookie gates (e.g. Tr-7Dak's "sto-idd" anti-bot gate) no longer
+  block the listing/resolving: the plugin now emulates the browser behaviour
+  (parse document.cookie from the gate page, inject the cookie and repeat the
+  request, up to 3 tries). Works best with a VPN because the gate accepts a
+  repeat only within one second.
+
+[B]Version 1.0.5[/B]
+
+- Changed: the 8 Turkish-content sites are now prefixed with "Tr-" and moved
+  to the top of the site list so they appear together:
+  Tr-Kalite18, Tr-Maheir, Tr-Hdabla, Tr-Pornoanne, Tr-Doeda, Tr-Evooli,
+  Tr-7Dak and Tr-Roxporno (site visibility toggles in Settings updated to
+  the same IDs/labels).
+
+[B]Version 1.0.4[/B]
+
+- Added: 8 new sites - Kalite18, Maheir, HdAbla, PornoAnne, Doeda, Evooli,
+  RoxPorno and 7Dak (listings, categories, search and pagination)
+- Added: new generic "smart" player resolver (catcher action=smart). It reads
+  the video/player page, follows iframe/embedded players, calls ajax player
+  APIs (ajax_sources.php, hash/vid), parses jwplayer file: sources, JSON-LD
+  contentUrl and <video>/<source> tags, and resolves relative HLS playlists.
+  Covers vidvod, canlitvnews, videojs, fakitonye, cdnfast and similar players.
+
+[B]Version 1.0.3[/B]
+
+- Fixed: "Save" (download) crashed on Python 2 with
+  "'module' object has no attribute 'urlretrieve'" - urlretrieve is now
+  imported in a Python 2/3 compatible way (urllib on Py2, urllib.request on Py3)
+- Changed: plugin icon is now the Misc Pack (misc-pack) logo
+
+[B]Version 1.0.2[/B]
+
+- Fixed: xHamster (2026 redesign) - listings, thumbnails, categories and
+  pagination now parsed from the embedded window.initials JSON (title /
+  pageURL / thumbURL); mega-menu categories via data-role=category-menu-link;
+  Best Videos + Newest shortcuts; next page via rel=next / data-page=next
+- Fixed: xHamster playback - catcher now uses the no-script <video> mp4
+  source (720p) with the no-player fallback link
+- Added: JSON "\/" unescape applied to all parsed item values (clean2)
+
+[B]Version 1.0.1[/B]
+
+- Removed: BitPorno (block entry, cfg, catcher, settings toggle, icon)
+- Fixed: amateur8 / anyshemale playback (catcher v-acctoken catch-all +
+  get_file target broadening for query-string tokens), anysex thumbnails,
+  sexu icons
+- Added: txxx.me, upornia.tube, hclips.com (TubeCorp JSON API listings)
+  and sexu.name (replaces sexu.com): listing + search + tc playback
+- Added: tc token decoder in core.py (base64 + homoglyph noise cleanup),
+  catcher action=tc rules, JSON "/" unescape in clean2
+- Changed: provider-name now "Misc Pack" (Kodi Author field)
+
+[B]Version 1.0.0[/B]
+
+- Initial rebranded release of the working 1.9.5 code base
+- Added: KVS (kt_player) video token decoder — videolinks.py (kvs_decode)
+- Fixed: ah-me video playback ('function/0/...' tokens are now decoded to the
+  valid B-token; verified server-side against 2 real videos)
+- Updated: catcher KVS family (ahme, analdin, ashemaletube, amateur8, fapnado,
+  keekass, anyshemale, anysex, transdoe, transtube) action=kvs rules
+- Note: the decode license is found automatically on the page (16-char 'code'
+  key); direct/plain URLs pass through unchanged
