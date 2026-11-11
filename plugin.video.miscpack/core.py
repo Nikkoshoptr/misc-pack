@@ -96,6 +96,7 @@ urlopen = urllib_request.urlopen
 cj = http_cookiejar.LWPCookieJar()
 Request = urllib_request.Request
 USERAGENT = 'Mozilla/5.0 (Windows; U; Windows NT 5.2; en-GB; rv:1.8.1.18) Gecko/20081029 Firefox/2.0.0.18'
+UA_MODERN = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
 
 if cj:
     if os.path.isfile(TRANSLATEPATH(cookiePath)):
@@ -108,6 +109,56 @@ else:
     opener = urllib_request.build_opener()
 
 urllib_request.install_opener(opener)
+
+
+def smart_gate_refetch(request, undecoded):
+    """Handle JS cookie gates on any fetch (list pages included).
+
+    Some sites (e.g. 7dak.com with its 'sto-idd' spam protection) answer the
+    FIRST request with a tiny script like
+        document.cookie="sto-idd=..."; document.location.reload();
+    No Set-Cookie header is used, so a browser runs the JS and reloads while
+    a plain HTTP client gets stuck on the gate page. Emulate it: parse the
+    JS cookie, inject it into the cookie jar for the same domain and refetch
+    (max 3 tries). Returns the (possibly refetched) undecoded body bytes.
+    """
+    gate_re = re.compile(
+        rb'document\.cookie\s*=\s*["\']?([A-Za-z0-9_\-]+=[^"\';]{1,500})',
+        re.IGNORECASE)
+    for _gate_try in range(3):
+        m = gate_re.search(undecoded[:8192]) if undecoded else None
+        if not m:
+            break
+        try:
+            pair = m.group(1).decode('latin-1', 'ignore')
+            cookie_name = pair.split('=', 1)[0].strip()
+            host = urllib_parse.urlparse(request.get_full_url()).netloc
+            new_cookie = http_cookiejar.Cookie(
+                version=0, name=cookie_name, value=pair.split('=', 1)[1].strip(),
+                port=None, port_specified=False,
+                domain=host, domain_specified=False, domain_initial_dot=False,
+                path='/', path_specified=True,
+                secure=False, expires=None, discard=True,
+                comment=None, comment_url=None, rest={}, rfc2109=False)
+            cj.load(TRANSLATEPATH(cookiePath), ignore_discard=True)
+            cj.set_cookie(new_cookie)
+            cj.save(TRANSLATEPATH(cookiePath), ignore_discard=True)
+            gopener = urllib_request.build_opener(
+                urllib_request.HTTPCookieProcessor(cj))
+            urllib_request.install_opener(gopener)
+            gresp = gopener.open(request)
+            cj.save(TRANSLATEPATH(cookiePath), ignore_discard=True)
+            undecoded = gresp.read()
+            if enable_debug:
+                xbmc.log('JS cookie gate handled (list fetch): %s (try %d)' %
+                         (cookie_name, _gate_try + 1), INFO)
+        except Exception:
+            if enable_debug:
+                xbmc.log('JS cookie gate handling failed: %s' %
+                         request.get_full_url(), INFO)
+            break
+    return undecoded
+
 
 if addon.getSetting('enable_debug') == 'true':
     enable_debug = True
@@ -474,6 +525,9 @@ class CCurrentList(object):
         self.catcher = []
         self.items = []
         self.rules = []
+        self.last_fetch_err = ''
+        self.last_page_note = ''
+        self.last_page_len = 0
 
     def getKeyboard(self, default='', heading='', hidden=False):
         kboard = xbmc.Keyboard(default, heading, hidden)
@@ -813,15 +867,35 @@ class CCurrentList(object):
 
         if recursive and self.start != '':
             if lItem is None:
-                self.loadRemote(self.start, False)
-                if self.start_alts and len(self.items) == 0:
-                    for alt in self.start_alts:
-                        del self.items[:]
-                        if enable_debug:
-                            xbmc.log('Trying start_alt: ' + str(alt), INFO)
-                        self.loadRemote(alt, False)
-                        if len(self.items) > 0:
-                            break
+                # try the primary start first, then every start_alt; each
+                # start url is tried twice (default UA, then a modern UA -
+                # some portals reject or challenge the ancient default UA).
+                # If nothing yields items, tell the user what happened.
+                attempts = [(self.start, None)]
+                for alt in self.start_alts:
+                    attempts.append((alt, None))
+                attempts.append((self.start, UA_MODERN))
+                for alt in self.start_alts:
+                    attempts.append((alt, UA_MODERN))
+                diag = []
+                for att_url, att_ua in attempts:
+                    del self.items[:]
+                    self.loadRemote(att_url, False, None, ua=att_ua)
+                    if len(self.items) > 0:
+                        diag = []
+                        break
+                    if self.last_fetch_err:
+                        diag.append('%s -> hata: %s' % (att_url, self.last_fetch_err))
+                    else:
+                        diag.append('%s -> %d B %s, 0 öğe' % (
+                            att_url, self.last_page_len,
+                            self.last_page_note or ''))
+                if len(self.items) == 0 and diag:
+                    try:
+                        msg = u'Liste alınamadı:\n' + u'\n'.join(diag[:4])
+                        xbmcgui.Dialog().ok('Misc Pack', msg)
+                    except Exception:
+                        pass
             else:
                 if self.getFileExtension(lItem.infos_dict['url']) == 'cfg':
                     lItem.infos_dict['url'] = self.start
@@ -852,10 +926,15 @@ class CCurrentList(object):
                 info_value = os.path.join(imgDir, 'video.png')
         return clean_safe(info_value)
 
-    def loadRemote(self, remote_url, recursive=True, lItem=None):
+    def loadRemote(self, remote_url, recursive=True, lItem=None, ua=None):
         remote_url = urllib_parse.unquote_plus(remote_url)
         if enable_debug:
             xbmc.log('loadRemote: ' + repr(remote_url), INFO)
+        if ua is None:
+            ua = USERAGENT
+        self.last_fetch_err = ''
+        self.last_page_note = ''
+        self.last_page_len = 0
         if lItem is None:
             lItem = self.decodeUrl(remote_url)
         try:
@@ -886,10 +965,10 @@ class CCurrentList(object):
                 except:
                     traceback.print_exc(file=sys.stdout)
             if self.reference == '':
-                txheaders = {'User-Agent': USERAGENT,
+                txheaders = {'User-Agent': ua,
                              'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.7'}
             else:
-                txheaders = {'User-Agent': USERAGENT,
+                txheaders = {'User-Agent': ua,
                              'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.7',
                              self.reference: self.content}
             if enable_debug:
@@ -904,11 +983,21 @@ class CCurrentList(object):
                 urllib_request.install_opener(opener)
                 handle = urlopen(req)
                 cj.save(TRANSLATEPATH(cookiePath), ignore_discard=True)
-            except:
+            except Exception as e:
                 if enable_debug:
                     traceback.print_exc(file=sys.stdout)
+                try:
+                    self.last_fetch_err = ('%s: %s' % (type(e).__name__,
+                                                       smart_unicode(str(e))[:80]))
+                except Exception:
+                    self.last_fetch_err = 'HTTP istek hatası'
                 return
             undecoded = handle.read()
+            self.last_page_len = len(undecoded)
+            # list fetches must pass JS cookie gates too (e.g. 7dak sto-idd)
+            undecoded = smart_gate_refetch(req, undecoded)
+            if self.last_page_len != len(undecoded):
+                self.last_page_note = 'JS-gate'
 
             encoding = None
             content_type = handle.headers.get('content-type', '')
@@ -922,14 +1011,30 @@ class CCurrentList(object):
                     encoding = r.group(1).decode('latin-1') if not PY2 else r.group(1)
 
             data = undecoded.decode(encoding.lower(), errors='ignore') if encoding else undecoded.decode('latin-1', errors='ignore')
+            # quick page classification for diagnostics
+            try:
+                head = data[:8000].lower()
+                if 'just a moment' in head or 'cf-browser-verification' in head or 'checking your browser' in head or 'challenges.cloudflare.com' in head:
+                    self.last_page_note = 'Cloudflare'
+                elif 'erisime_engellenmis' in head or 'aidiyet.esb.org.tr' in head or 'esb.org.tr' in head:
+                    self.last_page_note = 'BTK'
+                elif 'document.cookie' in head and 'location.reload' in head:
+                    self.last_page_note = 'JS-gate'
+            except Exception:
+                pass
             current_url_page = curr_url
             if enable_debug:
                 f.write(data)
                 f.close()
                 xbmc.log('Remote URL ' + str(curr_url) + ' opened', INFO)
-        except IOError:
+        except IOError as e:
             if enable_debug:
                 traceback.print_exc(file=sys.stdout)
+            try:
+                self.last_fetch_err = ('%s: %s' % (type(e).__name__,
+                                                   smart_unicode(str(e))[:80]))
+            except Exception:
+                self.last_fetch_err = 'IO hatası'
             return -1
 
         # Find list items
@@ -1192,7 +1297,7 @@ class ContentFetcher(object):
         # domain and refetch the request once.
         # ------------------------------------------------------------------
         gate = re.search(
-            r'document\.cookie\s*=\s*["\']([A-Za-z0-9_\-]+=[^"\';]{1,500})["\']',
+            r'document\.cookie\s*=\s*["\']?([A-Za-z0-9_\-]+=[^"\';]{1,500})',
             contents, re.IGNORECASE)
         for _gate_try in range(3):
             if not gate:
@@ -1202,7 +1307,7 @@ class ContentFetcher(object):
                 cookie_name = pair.split('=', 1)[0].strip()
                 host = urllib_parse.urlparse(request.get_full_url()).netloc
                 new_cookie = http_cookiejar.Cookie(
-                    version=0, name=cookie_name, value=pair.split('=', 1)[1],
+                    version=0, name=cookie_name, value=pair.split('=', 1)[1].strip(),
                     port=None, port_specified=False,
                     domain=host, domain_specified=False, domain_initial_dot=False,
                     path='/', path_specified=True,
@@ -1230,7 +1335,7 @@ class ContentFetcher(object):
                     xbmc.log('JS cookie gate handled: %s (%s, try %d)' %
                              (cookie_name, request.get_full_url(), _gate_try + 1), INFO)
                 gate = re.search(
-                    r'document\.cookie\s*=\s*["\']([A-Za-z0-9_\-]+=[^"\';]{1,500})["\']',
+                    r'document\.cookie\s*=\s*["\']?([A-Za-z0-9_\-]+=[^"\';]{1,500})',
                     contents, re.IGNORECASE)
             except Exception:
                 if enable_debug:

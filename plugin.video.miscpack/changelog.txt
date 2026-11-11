@@ -1,3 +1,25 @@
+[B]Version 1.0.8[/B]
+
+- Fixed: the JS cookie gate emulation (sto-idd etc.) NEVER matched the gate
+  script - the regex required a closing quote right after the cookie value,
+  but the value is followed by "; max-age=..." so the match failed and the
+  gate handling was dead code. The detection regex is fixed (both fetch
+  paths).
+- Fixed: LISTING fetches now handle JS cookie gates too. The 1.0.6 gate
+  emulation only covered player/resolver requests; Tr-7Dak's start page is
+  fetched through a different path that hit the gate unprotected -> empty
+  list. Now the gate is emulated on the list fetch as well (max 3 tries,
+  refetch within the 1 second cookie window).
+- Added: each start url is automatically retried once with a modern
+  User-Agent (Chrome 126) - some portals reject or challenge the ancient
+  default User-Agent from the plugin.
+- Added: when a site list still comes back empty, the plugin now shows a
+  small on-screen diagnostic (per attempt: connection error, page size,
+  Cloudflare / BTK block / JS-gate classification) so problems can be
+  reported and fixed precisely.
+- Repository: addons.xml checksum set to verify="false" so update checks
+  always refetch fresh metadata (stale cached "1.0.6" listings fixed).
+
 [B]Version 1.0.7[/B]
 
 - Fixed: video playback on several sites (Tr-Doeda, Tr-Kalite18 and players
