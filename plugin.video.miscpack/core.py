@@ -125,6 +125,10 @@ def smart_gate_refetch(request, undecoded):
     gate_re = re.compile(
         rb'document\.cookie\s*=\s*["\']?([A-Za-z0-9_\-]+=[^"\';]{1,500})',
         re.IGNORECASE)
+    if not undecoded or len(undecoded) > 4096:
+        # gate pages are tiny (a few hundred bytes); large pages that happen
+        # to contain a document.cookie line are real pages, not gates
+        return undecoded
     for _gate_try in range(3):
         m = gate_re.search(undecoded[:8192]) if undecoded else None
         if not m:
@@ -878,31 +882,80 @@ class CCurrentList(object):
                 for alt in self.start_alts:
                     attempts.append((alt, UA_MODERN))
                 diag = []
-                for att_url, att_ua in attempts:
-                    del self.items[:]
-                    self.loadRemote(att_url, False, None, ua=att_ua)
-                    if len(self.items) > 0:
-                        diag = []
-                        break
-                    if self.last_fetch_err:
-                        diag.append('%s -> hata: %s' % (att_url, self.last_fetch_err))
-                    else:
-                        diag.append('%s -> %d B %s, 0 öğe' % (
-                            att_url, self.last_page_len,
-                            self.last_page_note or ''))
-                if len(self.items) == 0 and diag:
-                    try:
-                        msg = u'Liste alınamadı:\n' + u'\n'.join(diag[:4])
-                        xbmcgui.Dialog().ok('Misc Pack', msg)
-                    except Exception:
-                        pass
+                try:
+                    for att_url, att_ua in attempts:
+                        del self.items[:]
+                        try:
+                            self.loadRemote(att_url, False, None, ua=att_ua)
+                        except Exception:
+                            self.last_fetch_err = 'istisna'
+                            if enable_debug:
+                                traceback.print_exc(file=sys.stdout)
+                        if len(self.items) > 0:
+                            diag = []
+                            break
+                        if self.last_fetch_err:
+                            diag.append('%s -> hata: %s' % (att_url, self.last_fetch_err))
+                        else:
+                            diag.append('%s -> %d B %s, 0 ogeler' % (
+                                att_url, self.last_page_len,
+                                self.last_page_note or ''))
+                    if len(self.items) == 0 and diag:
+                        self.showDiagDialog(diag)
+                except Exception:
+                    if enable_debug:
+                        traceback.print_exc(file=sys.stdout)
             else:
                 if self.getFileExtension(lItem.infos_dict['url']) == 'cfg':
-                    lItem.infos_dict['url'] = self.start
-                    self.loadRemote(self.start, False, lItem)
+                    # real navigation also needs the start_alt / modern-UA
+                    # fallback (this is the path every site menu click uses)
+                    attempts = [(self.start, None)]
+                    for alt in self.start_alts:
+                        attempts.append((alt, None))
+                    attempts.append((self.start, UA_MODERN))
+                    for alt in self.start_alts:
+                        attempts.append((alt, UA_MODERN))
+                    diag = []
+                    try:
+                        for att_url, att_ua in attempts:
+                            del self.items[:]
+                            lItem.infos_dict['url'] = att_url
+                            try:
+                                self.loadRemote(att_url, False, lItem, ua=att_ua)
+                            except Exception:
+                                self.last_fetch_err = 'istisna'
+                                if enable_debug:
+                                    traceback.print_exc(file=sys.stdout)
+                            if len(self.items) > 0:
+                                diag = []
+                                break
+                            if self.last_fetch_err:
+                                diag.append('%s -> hata: %s' % (att_url, self.last_fetch_err))
+                            else:
+                                diag.append('%s -> %d B %s, 0 ogeler' % (
+                                    att_url, self.last_page_len,
+                                    self.last_page_note or ''))
+                        if len(self.items) == 0 and diag:
+                            self.showDiagDialog(diag)
+                    except Exception:
+                        if enable_debug:
+                            traceback.print_exc(file=sys.stdout)
                 else:
                     self.loadRemote(lItem.infos_dict['url'], False, lItem)
         return 0
+
+    def showDiagDialog(self, diag):
+        """Show a small on-screen report why a site list is empty (Py2-safe)."""
+        try:
+            lines = [smart_unicode(d) for d in diag[:4]]
+            msg = u'Liste alinamadi:\n' + u'\n'.join(lines)
+            title = u'Misc Pack'
+            if PY2:
+                xbmcgui.Dialog().ok(title.encode('utf-8'), msg.encode('utf-8'))
+            else:
+                xbmcgui.Dialog().ok(title, msg)
+        except Exception:
+            pass
 
     def infoFormatter(self, info_name, info_value, cfg_file):
         # Site specific info handling

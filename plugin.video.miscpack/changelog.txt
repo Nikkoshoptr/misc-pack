@@ -1,3 +1,16 @@
+[B]Version 1.0.10[/B]
+
+- Fixed: the start_alt / modern-User-Agent fallback and the on-screen
+  empty-list diagnostic did NOT run for normal site navigation (they were
+  only wired to an internal load path). Every site menu click now uses the
+  full fallback chain: primary start -> start_alt mirrors -> modern UA
+  retry -> diagnostic dialog.
+- Hardened: the diagnostic dialog is now crash-proof (Python 2 safe message
+  building, every step wrapped); the JS cookie gate refetch only triggers
+  on small pages (< 4 KB) so real pages containing document.cookie lines
+  are never mistaken for a gate.
+- Repository addon.xml unchanged (plain checksum, no verify attribute).
+
 [B]Version 1.0.9[/B]
 
 - Fixed: repository.miscpack-1.0.8.zip could crash Vavoo when installing
