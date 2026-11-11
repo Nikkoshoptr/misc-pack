@@ -1924,7 +1924,10 @@ class Main(object):
             result = self.parseView(url)
         else:
             if url == 'sites.list':
-                self.currentlist.items = [item for item in self.currentlist.items if addon.getSetting(item.infos_dict['title']) == 'true']
+                # '!= false' (not '== true'): some Kodi forks return an empty
+                # string for settings that were never stored; treating that
+                # as disabled would empty the whole root menu
+                self.currentlist.items = [item for item in self.currentlist.items if addon.getSetting(item.infos_dict['title']) != 'false']
             for m in self.currentlist.items:
                 try:
                     m_type = m.infos_dict['type']

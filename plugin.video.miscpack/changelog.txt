@@ -1,3 +1,16 @@
+[B]Version 1.0.11[/B]
+
+- Fixed: empty root menu after a fresh install. The site filter now treats
+  missing/empty setting values as ENABLED (only an explicit "false" hides a
+  site) - some Kodi forks return an empty string for settings that were
+  never stored, which wiped the whole site list.
+- Changed: the adult content warning dialog no longer shows on fresh
+  installs by default (hide_warning default is now on). Accidentally
+  answering "No" on that dialog was another way to end up with an empty
+  list. The warning can be re-enabled in the addon settings.
+- Includes all 1.0.10 fixes (fallback chain wired to real navigation,
+  crash-proof diagnostic, gate refetch limited to small pages).
+
 [B]Version 1.0.10[/B]
 
 - Fixed: the start_alt / modern-User-Agent fallback and the on-screen
