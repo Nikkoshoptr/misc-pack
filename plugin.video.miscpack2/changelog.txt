@@ -1,3 +1,11 @@
+[B]Version 1.0.17[/B]
+
+- Removed 4 sites from the list on user request: CelebsNude, ClipHunter,
+  DoodhWali, KamaBaba (removed from sites.list and settings.xml, cfg files
+  and icons deleted). Shared generic video-link catchers in catcher.list
+  are kept because other sites use the same patterns.
+- Same code as 1.0.16 (root-cause Py2 fix included).
+
 [B]Version 1.0.16[/B]
 
 - Fixed: THE root cause of the startup crash. The JS cookie gate regex used
