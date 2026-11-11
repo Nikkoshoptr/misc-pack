@@ -1,3 +1,14 @@
+[B]Version 1.0.14[/B]
+
+- Added: crash catcher. The launcher now catches ANY startup crash (including
+  import-time errors that happen before the plugin code runs), shows the
+  reason on screen in a dialog, and writes the full traceback to
+  miscpack2_crash.txt in the addon's profile folder. The plugin's own
+  runtime error handler writes the same file.
+- Fixed: one Python 2.6-unsafe auto-numbered string format.
+- No other changes; this build is for diagnosing the startup error
+  ("check the log" notification) on some devices.
+
 [B]Version 1.0.13[/B]
 
 - Changed: the addon is published under a fresh id (plugin.video.miscpack2,

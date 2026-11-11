@@ -103,7 +103,7 @@ if cj:
         try:
             cj.load(TRANSLATEPATH(cookiePath), ignore_discard=True)
         except http_cookiejar.LoadError as e:
-            xbmc.log('Failed to open cookie file {}'.format(e), INFO)
+            xbmc.log('Failed to open cookie file {0}'.format(e), INFO)
     opener = urllib_request.build_opener(urllib_request.HTTPCookieProcessor(cj))
 else:
     opener = urllib_request.build_opener()
@@ -2137,5 +2137,12 @@ class Main(object):
         except Exception as e:
             if enable_debug:
                 traceback.print_exc(file=sys.stdout)
+            try:
+                _cpath = os.path.join(settingsDir, 'miscpack2_crash.txt')
+                _cf = open(_cpath, 'w')
+                _cf.write(traceback.format_exc())
+                _cf.close()
+            except Exception:
+                pass
             xbmcgui.Dialog().ok('Misc Pack Error',
                                 'Error running Misc Pack.\n\nReason:\n' + str(e))
