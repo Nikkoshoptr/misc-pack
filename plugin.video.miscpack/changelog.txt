@@ -1,3 +1,12 @@
+[B]Version 1.0.9[/B]
+
+- Fixed: repository.miscpack-1.0.8.zip could crash Vavoo when installing
+  (the addon.xml checksum "verify" attribute is not accepted by some Vavoo
+  builds). The attribute is removed again; the repository zip installs
+  normally now.
+- No plugin functional changes; version bumped to keep the plugin and the
+  repository addon at the same version number.
+
 [B]Version 1.0.8[/B]
 
 - Fixed: the JS cookie gate emulation (sto-idd etc.) NEVER matched the gate
