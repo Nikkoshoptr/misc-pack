@@ -1,3 +1,14 @@
+[B]Version 1.0.16[/B]
+
+- Fixed: THE root cause of the startup crash. The JS cookie gate regex used
+  an rb'' string literal, which is Python 3-only syntax - on Python 2
+  devices (Vavoo) the whole plugin failed with SyntaxError at import, so
+  every version since 1.0.8 crashed before showing any list. The pattern is
+  now a Py2/Py3-safe raw string (encoded to bytes only on Python 3).
+- Everything else unchanged: playback referer fix, start_alt mirrors,
+  modern-UA retry, leading-slash fallback, on-screen diagnosis, crash
+  catcher with scrollable report.
+
 [B]Version 1.0.15[/B]
 
 - Improved crash report: the crash reason is now shown in a SCROLLABLE text

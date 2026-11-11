@@ -122,9 +122,14 @@ def smart_gate_refetch(request, undecoded):
     JS cookie, inject it into the cookie jar for the same domain and refetch
     (max 3 tries). Returns the (possibly refetched) undecoded body bytes.
     """
-    gate_re = re.compile(
-        rb'document\.cookie\s*=\s*["\']?([A-Za-z0-9_\-]+=[^"\';]{1,500})',
-        re.IGNORECASE)
+    # NOTE: no raw-bytes string literal here - it is a Python 3-only syntax
+    # and makes the whole module fail with SyntaxError on Python 2 (Vavoo).
+    # A raw str is bytes on Py2; on Py3 we encode the pattern for a bytes regex.
+    _gate_pat = r'document\.cookie\s*=\s*["\']?([A-Za-z0-9_\-]+=[^"\';]{1,500})'
+    if PY2:
+        gate_re = re.compile(_gate_pat, re.IGNORECASE)
+    else:
+        gate_re = re.compile(_gate_pat.encode('utf-8'), re.IGNORECASE)
     if not undecoded or len(undecoded) > 4096:
         # gate pages are tiny (a few hundred bytes); large pages that happen
         # to contain a document.cookie line are real pages, not gates
