@@ -1,3 +1,14 @@
+[B]Version 1.0.12[/B]
+
+- Added: on-screen root diagnosis. If the site list is still empty, a dialog
+  now shows exactly what failed on the device (sites.list readable? how many
+  entries parsed / filtered? Python 2 or 3? which paths were used).
+- Added: loadLocal now strips a leading slash from filenames, in case the
+  fork requests "/sites.list" instead of "sites.list".
+- Repository published ALSO under a fresh id (repository.miscpack2 /
+  "Misc Pack 2") to bypass any broken half-registration of the old id in
+  Vavoo. Same files, same URLs, only the addon id is new.
+
 [B]Version 1.0.11[/B]
 
 - Fixed: empty root menu after a fresh install. The site filter now treats

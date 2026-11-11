@@ -737,6 +737,14 @@ class CCurrentList(object):
                   lCatcher=False):
         if enable_debug:
             xbmc.log('loadLocal: ' + str(filename), INFO)
+        # some forks pass a leading slash ('/sites.list'); strip it so the
+        # file can actually be found in resDir/cacheDir
+        try:
+            _str_ok = isinstance(filename, basestring)
+        except NameError:
+            _str_ok = isinstance(filename, str)
+        if _str_ok and filename[:1] == '/':
+            filename = filename.lstrip('/')
         for local_path in [resDir, cacheDir, '']:
             try:
                 data = smart_read_file(local_path, filename)
@@ -1927,7 +1935,9 @@ class Main(object):
                 # '!= false' (not '== true'): some Kodi forks return an empty
                 # string for settings that were never stored; treating that
                 # as disabled would empty the whole root menu
+                self.root_stats = (len(self.currentlist.items), 0)
                 self.currentlist.items = [item for item in self.currentlist.items if addon.getSetting(item.infos_dict['title']) != 'false']
+                self.root_stats = (self.root_stats[0], len(self.currentlist.items))
             for m in self.currentlist.items:
                 try:
                     m_type = m.infos_dict['type']
@@ -2085,6 +2095,29 @@ class Main(object):
                 if enable_debug:
                     xbmc.log('Cache directory purged', INFO)
                 self.parseView('sites.list')
+                if len(self.currentlist.items) == 0:
+                    # on-screen diagnosis for the empty root menu (Vavoo)
+                    try:
+                        stats = getattr(self, 'root_stats', None)
+                        try:
+                            data2 = smart_read_file(resDir, 'sites.list')
+                            readinfo = 'sites.list OK: %d satir' % len(data2)
+                        except Exception as rd:
+                            readinfo = 'sites.list OKUNAMADI: %s' \
+                                       % smart_unicode(str(rd))
+                        n_total = stats[0] if stats else -1
+                        n_kept = stats[1] if stats else -1
+                        msg = 'Kok liste bos!\n%s\nayrisan=%s kalan=%s\n' \
+                              'PY2=%s\nresDir=%s\nrootDir=%s' \
+                              % (readinfo, n_total, n_kept,
+                                 str(PY2), str(resDir), str(rootDir))
+                        heading = 'Misc Pack 1.0.12 - Kok Teshis'
+                        if PY2:
+                            msg = smart_unicode(msg).encode('utf-8')
+                            heading = heading.encode('utf-8')
+                        xbmcgui.Dialog().ok(heading, msg)
+                    except:
+                        pass
                 del self.currentlist.items[:]
                 if enable_debug:
                     xbmc.log('End of directory', INFO)

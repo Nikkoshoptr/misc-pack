@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="repository.miscpack" name="Misc Pack" version="1.0.11" provider-name="misc">
+<addon id="repository.miscpack" name="Misc Pack" version="1.0.12" provider-name="misc">
 	<extension point="xbmc.addon.repository" name="Misc Pack">
 		<dir>
 			<info compressed="false">https://raw.githubusercontent.com/Nikkoshoptr/misc-pack/main/addons.xml</info>
