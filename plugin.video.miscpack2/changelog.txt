@@ -1,3 +1,13 @@
+[B]Version 1.0.15[/B]
+
+- Improved crash report: the crash reason is now shown in a SCROLLABLE text
+  viewer (the plain OK dialog rendered the traceback lines blank on some
+  devices). The text is bracket-stripped so no part is treated as a GUI tag.
+- Staged crash catching: the report now says whether the crash happened in
+  "ASAMA 1 - import core" (loading the plugin code) or "ASAMA 2 -
+  core.Main" (running it), which pinpoints the failing step.
+- Still writes the full traceback to miscpack2_crash.txt.
+
 [B]Version 1.0.14[/B]
 
 - Added: crash catcher. The launcher now catches ANY startup crash (including

@@ -12,10 +12,15 @@ __credits__ = 'bootsy'
 ADDON_ID = 'plugin.video.miscpack2'
 
 
-def _heading_text(s):
+def _dialog_safe(s):
+    # Kodi renders [xxx] as a GUI markup tag and swallows the text; any
+    # brackets in a traceback would hide the reason -> replace them
+    s = str(s).replace('[', '(').replace(']', ')')
     try:
         s = s.encode('utf-8')  # Python 2 dialogs want bytes
     except AttributeError:
+        pass
+    except UnicodeDecodeError:
         pass
     return s
 
@@ -43,11 +48,17 @@ def report_crash(tb_text, where):
         pass
     try:
         import xbmcgui
+        dlg = xbmcgui.Dialog()
         lines = tb_text.strip().splitlines()
-        msg = '[%s]\n%s\n%s' % (where, lines[-2] if len(lines) > 1 else '', lines[-1])
+        body = where + '\n\n' + '\n'.join(lines)
         if path:
-            msg = msg + '\nDetay: ' + path
-        xbmcgui.Dialog().ok(_heading_text('Misc Pack 2 Crash'), _heading_text(msg))
+            body = body + '\n\nDetay dosya: ' + path
+        try:
+            # scrollable full-text viewer: best for tracebacks
+            dlg.textviewer(_dialog_safe('Misc Pack 2 Crash'), _dialog_safe(body))
+        except Exception:
+            dlg.ok(_dialog_safe('Misc Pack 2 Crash'),
+                   _dialog_safe((lines[-1] if lines else 'bos traceback') + '\n' + where))
     except Exception:
         pass
 
@@ -55,9 +66,13 @@ def report_crash(tb_text, where):
 def _safe_main():
     try:
         import core
+    except Exception:
+        report_crash(traceback.format_exc(), 'ASAMA 1 - import core')
+        return
+    try:
         core.Main()
     except Exception:
-        report_crash(traceback.format_exc(), 'core.Main / import core')
+        report_crash(traceback.format_exc(), 'ASAMA 2 - core.Main')
 
 
 class Main:
