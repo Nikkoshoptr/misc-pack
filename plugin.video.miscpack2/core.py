@@ -367,10 +367,11 @@ def tc_decode(value):
                 parts.append(ch)
         b64 = ''.join(parts)
         b64 = re.sub(r'[^A-Za-z0-9+/=]', '', b64)
+        # TubeCorp pads the base64 payload with '~~' (non-alphabet chars are
+        # stripped above), so standard '=' padding must be restored instead
+        # of failing (this was why hclips/txxx/upornia playback broke).
         if len(b64) % 4 != 0:
-            if enable_debug:
-                xbmc.log('tc decode: bad base64 length %d' % len(b64), INFO)
-            return ''
+            b64 += '=' * (4 - len(b64) % 4)
         path = base64.b64decode(b64).decode('ascii', errors='ignore')
         if not path.startswith('/'):
             if enable_debug:

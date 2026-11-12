@@ -1,3 +1,13 @@
+[B]Version 1.0.18[/B]
+
+- Fixed: HCLips / txxx / upornia video resolution (TubeCorp base64 payloads
+  are padded with '~~'; the decoder now restores standard padding instead
+  of failing).
+- Fixed: Ah-Me video resolution (site now serves a direct get_file URL with
+  access token instead of the old kvs token format).
+- Added: XHamster fallback target for signed xhcdn mp4 links.
+- Site lists unchanged (all listing patterns verified against live pages).
+
 [B]Version 1.0.17[/B]
 
 - Removed 4 sites from the list on user request: CelebsNude, ClipHunter,

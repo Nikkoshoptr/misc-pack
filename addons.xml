@@ -2,7 +2,7 @@
 <addons>
 <addon
   id="plugin.video.miscpack2"
-  version="1.0.17"
+  version="1.0.18"
   name="Misc Pack 2"
   provider-name="Misc Pack">
   <requires>
@@ -40,7 +40,7 @@
     </assets>
   </extension>
 </addon>
-<addon id="repository.miscpack" name="Misc Pack" version="1.0.17" provider-name="misc">
+<addon id="repository.miscpack" name="Misc Pack" version="1.0.18" provider-name="misc">
 	<extension point="xbmc.addon.repository" name="Misc Pack">
 		<dir>
 			<info compressed="false">https://raw.githubusercontent.com/Nikkoshoptr/misc-pack/main/addons.xml</info>
@@ -57,7 +57,7 @@
 		</assets>
 	</extension>
 </addon>
-<addon id="repository.miscpack2" name="Misc Pack 2" version="1.0.17" provider-name="misc">
+<addon id="repository.miscpack2" name="Misc Pack 2" version="1.0.18" provider-name="misc">
 	<extension point="xbmc.addon.repository" name="Misc Pack 2">
 		<dir>
 			<info compressed="false">https://raw.githubusercontent.com/Nikkoshoptr/misc-pack/main/addons.xml</info>
