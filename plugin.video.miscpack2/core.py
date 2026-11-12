@@ -1652,6 +1652,46 @@ class Main(object):
         xbmcgui.Dialog().notification(
             __addonname__, message, xbmcgui.NOTIFICATION_ERROR, sound=False)
 
+    def showNoVideoDiagnostic(self, original_url):
+        """No catcher matched on the video page: show and save exactly what
+        the device fetched, so the failure reason (consent wall, challenge
+        page, different markup...) can be diagnosed from a photo of this
+        report. Py2/Py3 safe."""
+        try:
+            contents = ''
+            try:
+                contents = self.fetcher.lastFetchedContents or ''
+            except Exception:
+                pass
+            report = 'OYNATMA TESHIS RAPORU\n'
+            report += 'Sorun: catcher hicbir kalip eslesmedi\n'
+            report += 'Video sayfasi: ' + str(original_url)[:150] + '\n'
+            report += 'Cekilen boyut: %d karakter\n' % len(contents)
+            report += 'Sayfa ilk 900 karakter:\n'
+            report += str(contents)[:900]
+            report += '\n(dosya: miscpack2_novideo.txt)\n'
+            try:
+                _cpath = os.path.join(settingsDir, 'miscpack2_novideo.txt')
+                if PY2:
+                    _report_b = report.encode('utf-8', 'replace')
+                else:
+                    _report_b = report.encode('utf-8')
+                _cf = open(_cpath, 'wb')
+                _cf.write(_report_b)
+                _cf.close()
+            except Exception:
+                pass
+            _d = str(report).replace('[', '(').replace(']', ')')
+            if PY2:
+                _d = _d.encode('utf-8', 'replace')
+            try:
+                xbmcgui.Dialog().textviewer('Misc Pack 2 Oynatma Teshis', _d)
+            except Exception:
+                xbmcgui.Dialog().ok('Misc Pack 2 Oynatma Teshis', _d[:900])
+        except Exception:
+            if enable_debug:
+                traceback.print_exc(file=sys.stdout)
+
     def getDirectLink(self, original_url):
         if enable_debug:
             xbmc.log('getting direct link (%s)' % original_url, INFO)
@@ -1660,7 +1700,10 @@ class Main(object):
         for source in self.currentlist.catcher:
             self.matchDirectLink(source, original_url)
 
-        return self.determinePreferredLink()
+        ret = self.determinePreferredLink()
+        if ret == '' and len(self.urlList) == 0:
+            self.showNoVideoDiagnostic(original_url)
+        return ret
 
     def matchDirectLink(self, source, original_url):
         if len(self.urlList) > 0 and source.quality == 'fallback':

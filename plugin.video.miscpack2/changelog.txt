@@ -1,3 +1,12 @@
+[B]Version 1.0.19[/B]
+
+- Added: on-screen playback diagnostic. When a video cannot be resolved
+  ("Unable to find the video"), the plugin now shows a scrollable report
+  with the video page URL, the fetched page size and the first 900
+  characters of the page, and saves it to miscpack2_novideo.txt in the
+  profile folder. Send a photo of that report for playback issues.
+- Same playback fixes as 1.0.18 (TubeCorp padding, Ah-Me, XHamster).
+
 [B]Version 1.0.18[/B]
 
 - Fixed: HCLips / txxx / upornia video resolution (TubeCorp base64 payloads
