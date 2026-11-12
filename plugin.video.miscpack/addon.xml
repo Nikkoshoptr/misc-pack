@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon
   id="plugin.video.miscpack"
-  version="1.0.12"
+  version="1.0.20"
   name="Misc Pack"
   provider-name="Misc Pack">
   <requires>

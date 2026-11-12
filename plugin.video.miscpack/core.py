@@ -95,15 +95,25 @@ imgDir = os.path.join(resDir, 'images')
 urlopen = urllib_request.urlopen
 cj = http_cookiejar.LWPCookieJar()
 Request = urllib_request.Request
-USERAGENT = 'Mozilla/5.0 (Windows; U; Windows NT 5.2; en-GB; rv:1.8.1.18) Gecko/20081029 Firefox/2.0.0.18'
-UA_MODERN = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
+# NOTE: a legacy 2008 Firefox/2.0 UA made xhamster serve its
+# "Please update your browser" page on video routes (lists tolerated it,
+# video pages did not). Every request now uses a modern Chrome UA.
+UA_LEGACY = 'Mozilla/5.0 (Windows; U; Windows NT 5.2; en-GB; rv:1.8.1.18) Gecko/20081029 Firefox/2.0.0.18'
+USERAGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
+UA_MODERN = USERAGENT
+# browser-like headers on every request: several sites (Cloudflare WAF)
+# reject requests that only carry a User-Agent (HTTP 403 Forbidden).
+# NEVER add 'Accept-Encoding' here - sendRequest/loadRemote do not
+# decompress, gzip answers would arrive broken.
+ACCEPT = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+ACCEPT_LANGUAGE = 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7'
 
 if cj:
     if os.path.isfile(TRANSLATEPATH(cookiePath)):
         try:
             cj.load(TRANSLATEPATH(cookiePath), ignore_discard=True)
         except http_cookiejar.LoadError as e:
-            xbmc.log('Failed to open cookie file {}'.format(e), INFO)
+            xbmc.log('Failed to open cookie file {0}'.format(e), INFO)
     opener = urllib_request.build_opener(urllib_request.HTTPCookieProcessor(cj))
 else:
     opener = urllib_request.build_opener()
@@ -122,9 +132,14 @@ def smart_gate_refetch(request, undecoded):
     JS cookie, inject it into the cookie jar for the same domain and refetch
     (max 3 tries). Returns the (possibly refetched) undecoded body bytes.
     """
-    gate_re = re.compile(
-        rb'document\.cookie\s*=\s*["\']?([A-Za-z0-9_\-]+=[^"\';]{1,500})',
-        re.IGNORECASE)
+    # NOTE: no raw-bytes string literal here - it is a Python 3-only syntax
+    # and makes the whole module fail with SyntaxError on Python 2 (Vavoo).
+    # A raw str is bytes on Py2; on Py3 we encode the pattern for a bytes regex.
+    _gate_pat = r'document\.cookie\s*=\s*["\']?([A-Za-z0-9_\-]+=[^"\';]{1,500})'
+    if PY2:
+        gate_re = re.compile(_gate_pat, re.IGNORECASE)
+    else:
+        gate_re = re.compile(_gate_pat.encode('utf-8'), re.IGNORECASE)
     if not undecoded or len(undecoded) > 4096:
         # gate pages are tiny (a few hundred bytes); large pages that happen
         # to contain a document.cookie line are real pages, not gates
@@ -162,6 +177,38 @@ def smart_gate_refetch(request, undecoded):
                          request.get_full_url(), INFO)
             break
     return undecoded
+
+
+def jinaFetch(url):
+    """Fetch a page through the jina.ai reader mirror (https://r.jina.ai/).
+
+    Sites behind a Cloudflare WAF (e.g. hdabla, 7dak, pornoanne) answer our
+    direct requests with HTTP 403 or a 'Just a moment...' challenge while
+    the reader mirror can still return the real HTML. Asks for the HTML
+    form via the X-Return-Format header and NEVER requests gzip
+    (sendRequest/loadRemote do not decompress). Returns the page as bytes
+    (or '' on failure, never raises). Python 2/3 safe.
+    """
+    try:
+        if not url or url.find('://') == -1:
+            return ''
+        jurl = 'https://r.jina.ai/' + url
+        headers = {'User-Agent': UA_MODERN,
+                   'X-Return-Format': 'html',
+                   'Accept': ACCEPT,
+                   'Accept-Language': ACCEPT_LANGUAGE}
+        req = Request(jurl, None, headers)
+        response = urlopen(req, timeout=45)
+        raw = response.read()
+        if (response.headers.get('Content-Encoding') or '').lower().find(
+                'gzip') != -1:
+            # we cannot decompress here - refuse instead of returning junk
+            return ''
+        return raw
+    except Exception:
+        if enable_debug:
+            xbmc.log('jinaFetch failed: %s' % url, INFO)
+        return ''
 
 
 if addon.getSetting('enable_debug') == 'true':
@@ -362,10 +409,11 @@ def tc_decode(value):
                 parts.append(ch)
         b64 = ''.join(parts)
         b64 = re.sub(r'[^A-Za-z0-9+/=]', '', b64)
+        # TubeCorp pads the base64 payload with '~~' (non-alphabet chars are
+        # stripped above), so standard '=' padding must be restored instead
+        # of failing (this was why hclips/txxx/upornia playback broke).
         if len(b64) % 4 != 0:
-            if enable_debug:
-                xbmc.log('tc decode: bad base64 length %d' % len(b64), INFO)
-            return ''
+            b64 += '=' * (4 - len(b64) % 4)
         path = base64.b64decode(b64).decode('ascii', errors='ignore')
         if not path.startswith('/'):
             if enable_debug:
@@ -1027,9 +1075,13 @@ class CCurrentList(object):
                     traceback.print_exc(file=sys.stdout)
             if self.reference == '':
                 txheaders = {'User-Agent': ua,
+                             'Accept': ACCEPT,
+                             'Accept-Language': ACCEPT_LANGUAGE,
                              'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.7'}
             else:
                 txheaders = {'User-Agent': ua,
+                             'Accept': ACCEPT,
+                             'Accept-Language': ACCEPT_LANGUAGE,
                              'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.7',
                              self.reference: self.content}
             if enable_debug:
@@ -1038,12 +1090,17 @@ class CCurrentList(object):
 
             curr_url = urllib_parse.unquote(curr_url).replace('\\/', '/')
             req = Request(curr_url, None, txheaders)
+            handle = None
+            undecoded = None
+            content_type = ''
             try:
                 cj.load(TRANSLATEPATH(cookiePath), ignore_discard=True)
                 opener = urllib_request.build_opener(urllib_request.HTTPCookieProcessor(cj))
                 urllib_request.install_opener(opener)
                 handle = urlopen(req)
                 cj.save(TRANSLATEPATH(cookiePath), ignore_discard=True)
+                undecoded = handle.read()
+                content_type = handle.headers.get('content-type', '')
             except Exception as e:
                 if enable_debug:
                     traceback.print_exc(file=sys.stdout)
@@ -1052,16 +1109,28 @@ class CCurrentList(object):
                                                        smart_unicode(str(e))[:80]))
                 except Exception:
                     self.last_fetch_err = 'HTTP istek hatası'
+            if handle is not None:
+                self.last_page_len = len(undecoded)
+                # list fetches must pass JS cookie gates too (e.g. 7dak sto-idd)
+                undecoded = smart_gate_refetch(req, undecoded)
+                if self.last_page_len != len(undecoded):
+                    self.last_page_note = 'JS-gate'
+            if not undecoded:
+                # direct request failed or came back empty: retry through
+                # the jina reader mirror - Cloudflare WAF sites often
+                # answer us with 403 / 'Just a moment...' while the
+                # mirror still returns the real HTML.
+                jbytes = jinaFetch(curr_url)
+                if jbytes:
+                    undecoded = jbytes
+                    self.last_fetch_err = ''
+                    self.last_page_note = 'Jina'
+                    self.last_page_len = len(jbytes)
+                    content_type = 'text/html; charset=utf-8'
+            if not undecoded:
                 return
-            undecoded = handle.read()
-            self.last_page_len = len(undecoded)
-            # list fetches must pass JS cookie gates too (e.g. 7dak sto-idd)
-            undecoded = smart_gate_refetch(req, undecoded)
-            if self.last_page_len != len(undecoded):
-                self.last_page_note = 'JS-gate'
 
             encoding = None
-            content_type = handle.headers.get('content-type', '')
             if 'charset=' in content_type:
                 encoding = content_type.split('charset=')[-1]
 
@@ -1083,6 +1152,18 @@ class CCurrentList(object):
                     self.last_page_note = 'JS-gate'
             except Exception:
                 pass
+            # a Cloudflare challenge page also gets a second chance via
+            # the jina reader mirror (it can serve the real HTML)
+            if self.last_page_note == 'Cloudflare':
+                jbytes = jinaFetch(curr_url)
+                if jbytes:
+                    jtxt = jbytes.decode('utf-8', 'replace')
+                    jhead = jtxt[:8000].lower()
+                    if ('just a moment' not in jhead
+                            and 'challenges.cloudflare.com' not in jhead):
+                        data = jtxt
+                        self.last_page_note = 'Jina'
+                        self.last_page_len = len(jbytes)
             current_url_page = curr_url
             if enable_debug:
                 f.write(data)
@@ -1311,6 +1392,8 @@ class ContentFetcher(object):
 
         req = Request(url.replace('\\/', '/'), data)
         req.add_header('User-Agent', USERAGENT)
+        req.add_header('Accept', ACCEPT)
+        req.add_header('Accept-Language', ACCEPT_LANGUAGE)
         if rule.reference != '':
             req.add_header(
                 rule.reference,
@@ -1440,7 +1523,9 @@ class ContentFetcher(object):
 def smartFetch(url, data=None, referer=''):
     """Fetch a page or call a player API (Python 2/3 safe, never raises)."""
     try:
-        headers = {'User-Agent': USERAGENT}
+        headers = {'User-Agent': USERAGENT,
+                   'Accept': ACCEPT,
+                   'Accept-Language': ACCEPT_LANGUAGE}
         if referer:
             headers['Referer'] = referer
         if data is not None:
@@ -1646,6 +1731,46 @@ class Main(object):
         xbmcgui.Dialog().notification(
             __addonname__, message, xbmcgui.NOTIFICATION_ERROR, sound=False)
 
+    def showNoVideoDiagnostic(self, original_url):
+        """No catcher matched on the video page: show and save exactly what
+        the device fetched, so the failure reason (consent wall, challenge
+        page, different markup...) can be diagnosed from a photo of this
+        report. Py2/Py3 safe."""
+        try:
+            contents = ''
+            try:
+                contents = self.fetcher.lastFetchedContents or ''
+            except Exception:
+                pass
+            report = 'OYNATMA TESHIS RAPORU\n'
+            report += 'Sorun: catcher hicbir kalip eslesmedi\n'
+            report += 'Video sayfasi: ' + str(original_url)[:150] + '\n'
+            report += 'Cekilen boyut: %d karakter\n' % len(contents)
+            report += 'Sayfa ilk 900 karakter:\n'
+            report += str(contents)[:900]
+            report += '\n(dosya: miscpack_novideo.txt)\n'
+            try:
+                _cpath = os.path.join(settingsDir, 'miscpack_novideo.txt')
+                if PY2:
+                    _report_b = report.encode('utf-8', 'replace')
+                else:
+                    _report_b = report.encode('utf-8')
+                _cf = open(_cpath, 'wb')
+                _cf.write(_report_b)
+                _cf.close()
+            except Exception:
+                pass
+            _d = str(report).replace('[', '(').replace(']', ')')
+            if PY2:
+                _d = _d.encode('utf-8', 'replace')
+            try:
+                xbmcgui.Dialog().textviewer('Misc Pack Oynatma Teshis', _d)
+            except Exception:
+                xbmcgui.Dialog().ok('Misc Pack Oynatma Teshis', _d[:900])
+        except Exception:
+            if enable_debug:
+                traceback.print_exc(file=sys.stdout)
+
     def getDirectLink(self, original_url):
         if enable_debug:
             xbmc.log('getting direct link (%s)' % original_url, INFO)
@@ -1654,7 +1779,10 @@ class Main(object):
         for source in self.currentlist.catcher:
             self.matchDirectLink(source, original_url)
 
-        return self.determinePreferredLink()
+        ret = self.determinePreferredLink()
+        if ret == '' and len(self.urlList) == 0:
+            self.showNoVideoDiagnostic(original_url)
+        return ret
 
     def matchDirectLink(self, source, original_url):
         if len(self.urlList) > 0 and source.quality == 'fallback':
@@ -1678,6 +1806,8 @@ class Main(object):
                 return
 
         hdrs = {'User-Agent': USERAGENT,
+                'Accept': '*/*',
+                'Accept-Language': ACCEPT_LANGUAGE,
                 'Referer': self.matcher.media_referer or original_url}
         # only send cookies that belong to the media host (foreign cookies
         # from other sites can make some CDNs reject the request)
@@ -2137,5 +2267,12 @@ class Main(object):
         except Exception as e:
             if enable_debug:
                 traceback.print_exc(file=sys.stdout)
+            try:
+                _cpath = os.path.join(settingsDir, 'miscpack_crash.txt')
+                _cf = open(_cpath, 'w')
+                _cf.write(traceback.format_exc())
+                _cf.close()
+            except Exception:
+                pass
             xbmcgui.Dialog().ok('Misc Pack Error',
                                 'Error running Misc Pack.\n\nReason:\n' + str(e))

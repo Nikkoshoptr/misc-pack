@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
 <addon
-  id="plugin.video.miscpack2"
-  version="1.0.19"
-  name="Misc Pack 2"
+  id="plugin.video.miscpack"
+  version="1.0.20"
+  name="Misc Pack"
   provider-name="Misc Pack">
   <requires>
     <!-- Commenting xbmc.python allows install on all versions of Kodi -->
@@ -40,25 +40,8 @@
     </assets>
   </extension>
 </addon>
-<addon id="repository.miscpack" name="Misc Pack" version="1.0.19" provider-name="misc">
+<addon id="repository.miscpack" name="Misc Pack" version="1.0.20" provider-name="misc">
 	<extension point="xbmc.addon.repository" name="Misc Pack">
-		<dir>
-			<info compressed="false">https://raw.githubusercontent.com/Nikkoshoptr/misc-pack/main/addons.xml</info>
-			<checksum>https://raw.githubusercontent.com/Nikkoshoptr/misc-pack/main/addons.xml.md5</checksum>
-			<datadir zip="true">https://raw.githubusercontent.com/Nikkoshoptr/misc-pack/main</datadir>
-		</dir>
-	</extension>
-	<extension point="xbmc.addon.metadata">
-		<summary>Mainz misc files</summary>
-		<description>Mainz misc files.</description>
-		<platform>all</platform>
-		<assets>
-			<icon>icon.png</icon>
-		</assets>
-	</extension>
-</addon>
-<addon id="repository.miscpack2" name="Misc Pack 2" version="1.0.19" provider-name="misc">
-	<extension point="xbmc.addon.repository" name="Misc Pack 2">
 		<dir>
 			<info compressed="false">https://raw.githubusercontent.com/Nikkoshoptr/misc-pack/main/addons.xml</info>
 			<checksum>https://raw.githubusercontent.com/Nikkoshoptr/misc-pack/main/addons.xml.md5</checksum>

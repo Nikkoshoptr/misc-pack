@@ -1,3 +1,89 @@
+[B]Version 1.0.20[/B]
+
+- Fixed: xhamster video playback. The old 2008 User-Agent made xhamster
+  serve its "Please update your browser" page on video routes; every
+  request now uses a modern Chrome UA.
+- Added: browser-like Accept / Accept-Language headers on all requests
+  (several sites answer header-only requests with HTTP 403).
+- Added: jina reader fallback. If a site answers 403 or a Cloudflare
+  challenge, the page is retried through the r.jina.ai mirror so the
+  lists still load.
+- Renamed: the addon is now "Misc Pack" (plugin.video.miscpack) and the
+  repository entry "Misc Pack 2" is retired. Install this zip; the old
+  "Misc Pack 2" addon can be removed afterwards.
+
+[B]Version 1.0.19[/B]
+
+- Added: on-screen playback diagnostic. When a video cannot be resolved
+  ("Unable to find the video"), the plugin now shows a scrollable report
+  with the video page URL, the fetched page size and the first 900
+  characters of the page, and saves it to miscpack2_novideo.txt in the
+  profile folder. Send a photo of that report for playback issues.
+- Same playback fixes as 1.0.18 (TubeCorp padding, Ah-Me, XHamster).
+
+[B]Version 1.0.18[/B]
+
+- Fixed: HCLips / txxx / upornia video resolution (TubeCorp base64 payloads
+  are padded with '~~'; the decoder now restores standard padding instead
+  of failing).
+- Fixed: Ah-Me video resolution (site now serves a direct get_file URL with
+  access token instead of the old kvs token format).
+- Added: XHamster fallback target for signed xhcdn mp4 links.
+- Site lists unchanged (all listing patterns verified against live pages).
+
+[B]Version 1.0.17[/B]
+
+- Removed 4 sites from the list on user request: CelebsNude, ClipHunter,
+  DoodhWali, KamaBaba (removed from sites.list and settings.xml, cfg files
+  and icons deleted). Shared generic video-link catchers in catcher.list
+  are kept because other sites use the same patterns.
+- Same code as 1.0.16 (root-cause Py2 fix included).
+
+[B]Version 1.0.16[/B]
+
+- Fixed: THE root cause of the startup crash. The JS cookie gate regex used
+  an rb'' string literal, which is Python 3-only syntax - on Python 2
+  devices (Vavoo) the whole plugin failed with SyntaxError at import, so
+  every version since 1.0.8 crashed before showing any list. The pattern is
+  now a Py2/Py3-safe raw string (encoded to bytes only on Python 3).
+- Everything else unchanged: playback referer fix, start_alt mirrors,
+  modern-UA retry, leading-slash fallback, on-screen diagnosis, crash
+  catcher with scrollable report.
+
+[B]Version 1.0.15[/B]
+
+- Improved crash report: the crash reason is now shown in a SCROLLABLE text
+  viewer (the plain OK dialog rendered the traceback lines blank on some
+  devices). The text is bracket-stripped so no part is treated as a GUI tag.
+- Staged crash catching: the report now says whether the crash happened in
+  "ASAMA 1 - import core" (loading the plugin code) or "ASAMA 2 -
+  core.Main" (running it), which pinpoints the failing step.
+- Still writes the full traceback to miscpack2_crash.txt.
+
+[B]Version 1.0.14[/B]
+
+- Added: crash catcher. The launcher now catches ANY startup crash (including
+  import-time errors that happen before the plugin code runs), shows the
+  reason on screen in a dialog, and writes the full traceback to
+  miscpack2_crash.txt in the addon's profile folder. The plugin's own
+  runtime error handler writes the same file.
+- Fixed: one Python 2.6-unsafe auto-numbered string format.
+- No other changes; this build is for diagnosing the startup error
+  ("check the log" notification) on some devices.
+
+[B]Version 1.0.13[/B]
+
+- Changed: the addon is published under a fresh id (plugin.video.miscpack2,
+  visible name "Misc Pack 2"). The old id appears stuck in a broken
+  half-registered state on some devices (Vavoo): every update installs but
+  the addon always opens with an empty site list. A fresh id forces a clean
+  install state - the same trick that already fixed the repository addon
+  in 1.0.12 (repository.miscpack2).
+- Same code as 1.0.12: playback referer fix, start_alt mirrors, modern-UA
+  retry, leading-slash loadLocal fallback, on-screen root diagnosis.
+- Install "Misc Pack 2" INSTEAD of the old Misc Pack; the old one can be
+  uninstalled afterwards.
+
 [B]Version 1.0.12[/B]
 
 - Added: on-screen root diagnosis. If the site list is still empty, a dialog

@@ -23,6 +23,11 @@
 # Catcher sites
 ########################################################
 title=ahme.com
+target=video_url:\s*'(https?://[^']+\.mp4[^']*)'
+action=kvs
+url=%s
+extension=mp4
+quality=high
 target=video_url:\s*'(function/\d+/https?://[^']+\.mp4[^']*)'
 action=kvs
 url=%s
@@ -244,6 +249,10 @@ target=<a href="(https://video[0-9]+\.xhcdn\.com/[^"]+\.mp4[^"]*)"[^>]*class="pl
 url=%s
 extension=mp4
 quality=standard
+target=(https?://video[-0-9a-z]*\.xhcdn\.com/key=[^"\s]+\.mp4)
+url=%s
+extension=mp4
+quality=fallback
 ########################################################
 title=hotgoo.com
 target=so.addVariable\('file','(.+?)'
